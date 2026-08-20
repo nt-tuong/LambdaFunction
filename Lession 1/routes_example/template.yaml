@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Example AWS Lambda project (Python) with routes cho Users and Organizations.
+
+Globals:
+  Function:
+    Runtime: python3.11
+    Timeout: 10
+    MemorySize: 128
+
+Resources:
+  CommonLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: common-layer
+      Description: aws-lambda-powertools dùng chung cho các function
+      ContentUri: layers/common/
+      CompatibleRuntimes:
+        - python3.11
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: python3.11
+
+  UsersFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: users-function
+      CodeUri: functions/users/
+      Handler: app.lambda_handler
+      Layers:
+        - !Ref CommonLayer
+      Events:
+        GetAllUsers:
+          Type: Api
+          Properties:
+            Path: /users
+            Method: get
+        GetUserByCd:
+          Type: Api
+          Properties:
+            Path: /users/{user_cd}
+            Method: get
+
+  OrganizationsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: organizations-function
+      CodeUri: functions/organizations/
+      Handler: app.lambda_handler
+      Layers:
+        - !Ref CommonLayer
+      Events:
+        GetAllOrganizations:
+          Type: Api
+          Properties:
+            Path: /organizations
+            Method: get
+        GetOrganizationByCd:
+          Type: Api
+          Properties:
+            Path: /organizations/{org_cd}
+            Method: get
