@@ -1,0 +1,16 @@
+from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
+from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
+from pydantic_core import PydanticCustomError
+
+from common.exception_handlers.business_handler import handle_business_exception, BusinessException
+from common.exception_handlers.validation_handler import validation_exception_handler
+from common.exception_handlers.pydantic_custom_handler import handle_pydantic_custom_error
+from common.exception_handlers.media_type_handler import handle_unsupported_media_type
+from common.exception_handlers.system_handler import handle_system_exception
+
+def register_exception_handlers(app: APIGatewayHttpResolver):
+    app.exception_handler(BusinessException)(handle_business_exception)
+    app.exception_handler(RequestValidationError)(validation_exception_handler)
+    app.exception_handler(PydanticCustomError)(handle_pydantic_custom_error)
+    app.exception_handler(NotImplementedError)(handle_unsupported_media_type)
+    app.exception_handler(Exception)(handle_system_exception)

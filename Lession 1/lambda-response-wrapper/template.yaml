@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  The project lambda response wrapper
+
+Globals:
+  Function:
+    Runtime: python3.11
+    Timeout: 10
+    MemorySize: 128
+    Tracing: Active
+    LoggingConfig:
+      LogFormat: JSON
+  Api:
+    TracingEnabled: true
+
+Resources:
+  Layers:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: layers
+      Description: Shared Router + Response helper for all function
+      ContentUri: layers/
+      CompatibleRuntimes:
+        - python3.11
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: python3.11
+
+  UsersFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: users-function
+      CodeUri: functions/users/
+      Handler: app.lambda_handler
+      Layers:
+        - !Ref Layers
+      Events:
+        GetAllUsers:
+          Type: Api
+          Properties:
+            Path: /api/v1/users
+            Method: get
+        GetUserByCd:
+          Type: Api
+          Properties:
+            Path: /api/v1/users/{user_cd}
+            Method: get
+
+  OrganizationsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: organizations-function
+      CodeUri: functions/organizations/
+      Handler: app.lambda_handler
+      Layers:
+        - !Ref Layers
+      Events:
+        GetAllOrganizations:
+          Type: Api
+          Properties:
+            Path: /api/v1/organizations
+            Method: get
+        GetOrganizationByCd:
+          Type: Api
+          Properties:
+            Path: /api/v1/organizations/{org_cd}
+            Method: get
